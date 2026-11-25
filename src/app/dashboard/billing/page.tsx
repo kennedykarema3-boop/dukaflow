@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { changeSubscriptionPlan } from "@/app/actions/billing";
-import { startPaystackCheckout } from "@/app/actions/paystack";
+import { startMpesaCheckout } from "@/app/actions/mpesa";
 
 const plans = [
     { code: "free", name: "Free", price: "KES 0/month", detail: "50 products and 100 sales per month" },
@@ -67,14 +67,18 @@ async function BillingContent() {
                                 {currentPlan === plan.code ? "Current plan" : canManage ? "Choose Free" : "Admin only"}
                             </button>
                         ) : (
-                            <button formAction={startPaystackCheckout} disabled={!canManage || currentPlan === plan.code} className="mt-6 w-full rounded-lg bg-emerald-700 px-4 py-2 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40">
-                                {currentPlan === plan.code ? "Current plan" : canManage ? `Pay for ${plan.name}` : "Admin only"}
-                            </button>
+                            <>
+                                <input name="phone" required pattern="2547[0-9]{8}" placeholder="254712345678" className="mt-6 w-full rounded-lg border px-3 py-2 text-sm" aria-label="M-Pesa phone number" />
+                                <button formAction={startMpesaCheckout} disabled={!canManage || currentPlan === plan.code} className="mt-3 w-full rounded-lg bg-emerald-700 px-4 py-2 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40">
+                                    {currentPlan === plan.code ? "Current plan" : canManage ? "Pay with M-Pesa" : "Admin only"}
+                                </button>
+                            </>
                         )}
                     </form>
                 ))}
             </div>
             {!canManage && <p className="mt-6 text-sm text-amber-700">Only the business owner or admin can change the subscription.</p>}
+            <p className="mt-8 text-sm text-slate-500">M-Pesa subscriptions require a payment confirmation each billing period. Automatic recurring M-Pesa debits are not used.</p>
         </main>
     );
 }
